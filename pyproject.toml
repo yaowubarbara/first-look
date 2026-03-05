@@ -1,0 +1,11 @@
+[project]
+name = "first-look"
+version = "0.1.0"
+description = "AI tries new tools so you don't have to — monitors HN, installs in Docker sandbox, writes honest reviews"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.10"
+dependencies = ["pyyaml>=6.0"]
+
+[project.scripts]
+first-look = "main:main"
