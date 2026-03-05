@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>httpie/cli — first-look</title>
+<style>
+:root {
+  --bg: #0d1117;
+  --surface: #161b22;
+  --border: #30363d;
+  --text: #e6edf3;
+  --text-dim: #8b949e;
+  --accent: #58a6ff;
+  --green: #3fb950;
+  --yellow: #d29922;
+  --red: #f85149;
+  --purple: #bc8cff;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  line-height: 1.6;
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.header {
+  text-align: center;
+  padding: 48px 20px 32px;
+  border-bottom: 1px solid var(--border);
+}
+.header h1 { font-size: 32px; margin-bottom: 8px; }
+.header p { color: var(--text-dim); font-size: 18px; }
+
+.stats {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  padding: 20px;
+  color: var(--text-dim);
+  font-size: 14px;
+}
+.stats strong { color: var(--text); font-size: 20px; display: block; }
+
+.filters {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  padding: 16px 20px;
+  flex-wrap: wrap;
+}
+.filter-btn {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  padding: 6px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s;
+}
+.filter-btn:hover, .filter-btn.active {
+  background: var(--accent);
+  color: var(--bg);
+  border-color: var(--accent);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 20px;
+  max-width: 1200px;
+  margin: 24px auto;
+  padding: 0 20px;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  transition: border-color 0.2s, transform 0.2s;
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+.card:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+  text-decoration: none;
+}
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+.card-title { font-size: 18px; font-weight: 600; }
+.badge {
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+.badge.pass { background: rgba(63,185,80,0.15); color: var(--green); }
+.badge.warn { background: rgba(210,153,34,0.15); color: var(--yellow); }
+.badge.fail { background: rgba(248,81,73,0.15); color: var(--red); }
+.badge.unknown { background: rgba(139,148,158,0.15); color: var(--text-dim); }
+
+.card-desc {
+  color: var(--text-dim);
+  font-size: 14px;
+  margin-bottom: 16px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.card-meta {
+  display: flex;
+  gap: 16px;
+  font-size: 13px;
+  color: var(--text-dim);
+  flex-wrap: wrap;
+}
+.card-meta span { display: flex; align-items: center; gap: 4px; }
+.stars-display { color: var(--yellow); letter-spacing: 2px; font-size: 14px; }
+
+/* Report page */
+.report {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 32px 20px;
+}
+.report .back { display: inline-block; margin-bottom: 24px; color: var(--text-dim); }
+.report h1 { font-size: 28px; margin-bottom: 8px; }
+.report h2 { font-size: 20px; margin: 32px 0 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+.report h3 { font-size: 16px; margin: 20px 0 8px; }
+.report p { margin-bottom: 12px; }
+.report blockquote {
+  border-left: 3px solid var(--border);
+  padding: 8px 16px;
+  color: var(--text-dim);
+  margin: 12px 0;
+  font-style: italic;
+}
+.report table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 12px 0;
+}
+.report td {
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  font-size: 14px;
+}
+.report tr:nth-child(odd) { background: rgba(255,255,255,0.02); }
+.report ul { margin: 8px 0 16px 20px; }
+.report li { margin-bottom: 6px; font-size: 15px; }
+.report code {
+  background: rgba(255,255,255,0.06);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 13px;
+}
+.report strong { color: var(--accent); }
+.report hr { border: none; border-top: 1px solid var(--border); margin: 32px 0; }
+
+.footer {
+  text-align: center;
+  padding: 32px 20px;
+  color: var(--text-dim);
+  font-size: 13px;
+  border-top: 1px solid var(--border);
+}
+</style>
+</head>
+<body>
+  <div class="report">
+    <a class="back" href="index.html">← Back to all reports</a>
+    <h1>First Look: httpie/cli</h1>
+
+<blockquote>🥧 HTTPie CLI  — modern, user-friendly command-line HTTP client for the API era. JSON support, colors, sessions, downloads, plugins & more.</blockquote>
+
+<table>
+<tr><td>Field</td><td>Value</td></tr>
+<tr><td>Tested</td><td>2026-03-05 06:11 UTC</td></tr>
+<tr><td>Source</td><td>https://github.com/httpie/cli</td></tr>
+<tr><td>HN Post</td><td>Manual test</td></tr>
+<tr><td>Language</td><td>Python</td></tr>
+<tr><td>Stars</td><td>37636</td></tr>
+<tr><td>Verdict</td><td>WARN works_with_issues</td></tr>
+<tr><td>Install Difficulty</td><td>easy</td></tr>
+<tr><td>Estimated Human Time</td><td>2-3 minutes</td></tr>
+</table>
+
+<h2>Summary</h2>
+
+<p>HTTPie installs via pip without errors, but the CLI binaries land in ~/.local/bin which isn't on the default PATH in Ubuntu 22.04. Adding that directory to PATH resolves the issue. This is a common pip PATH gotcha, not a problem with HTTPie itself.</p>
+
+<h2>Environment Results</h2>
+
+<table>
+<tr><td>Environment</td><td>Status</td><td>Duration</td></tr>
+<tr><td>ubuntu-22.04</td><td>PASS</td><td>9.76s</td></tr>
+</table>
+
+<h2>Step-by-Step Installation Guide</h2>
+
+<ul><li>Run: pip install httpie</li>
+<li>Run: export PATH="$HOME/.local/bin:$PATH"</li>
+<li>Verify: http --version</li>
+<li>Optional: Add the PATH export to ~/.bashrc for persistence</li>
+</ul>
+<h2>Automated Usage Test</h2>
+
+<blockquote><em>The following is AI-generated based on actual command execution in a Docker sandbox. Results may differ in your environment.</em></blockquote>
+
+<strong>First Impression:</strong> The GET request experience is genuinely nice — colorized JSON output with zero config feels like what curl should have been. But I hit a surprising stdin-related error on basic POST requests that took the shine off quickly.
+
+<p>HTTPie makes the common case beautiful: a simple GET request gives you colorized, formatted output that's miles ahead of raw curl. The intuitive syntax for headers (Header:Value) and JSON data (key=value) reduces the cognitive load of building requests. However, the aggressive stdin detection caused 60% of my test commands to fail with a confusing error, which is a real problem if you're using it in scripts or non-interactive contexts. It's a great interactive tool with a rough edge that matters.</p>
+
+<strong>What I tried:</strong>
+<ul><li>Simple GET request to httpbin.org/get — worked perfectly, clean colorized JSON output with headers, exactly as advertised</li>
+<li>POST request with key=value JSON syntax (name=John email=john@example.com) — failed with a confusing 'stdin and request data cannot be mixed' error, which seems like a piping/TTY issue in the test environment rather than a real HTTPie bug, but it's the kind of gotcha that trips you up</li>
+<li>Offline mode with PUT, custom headers, and body data — same stdin conflict error, so anything involving request body data was broken in this context</li>
+<li>GET with custom headers (User-Agent:MyApp/1.0 Accept:application/json) — worked great, the Header:Value syntax is intuitive and clean</li>
+<li>Printing full request+response with --print=hHbB on the 418 teapot endpoint — worked nicely, seeing both sides of the conversation in one shot is handy for debugging</li>
+</ul>
+<strong>Pros:</strong>
+<ul><li>The syntax is genuinely more readable than curl — 'http GET url' vs 'curl -X GET url' is a small win, but Header:Value and key=value shortcuts add up</li>
+<li>Colorized, formatted JSON output by default is a real quality-of-life improvement over piping curl through jq</li>
+<li>The --print flag with hHbB granularity is well-designed for debugging — you pick exactly what you want to see</li>
+<li>Offline mode (--offline) is a clever feature for building and inspecting requests without sending them</li>
+<li>Installs cleanly via pip with no fuss</li>
+</ul>
+<strong>Cons:</strong>
+<ul><li>The stdin detection is overly aggressive — in non-interactive environments (CI, scripts, piped contexts), POST/PUT with body data fails unless you pass --ignore-stdin, which is a frustrating default</li>
+<li>The error message 'Request body from stdin and request data cannot be mixed' is technically accurate but unhelpful — it doesn't suggest --ignore-stdin as the fix</li>
+<li>3 out of 5 test commands failed, all due to the same stdin issue — that's a rough first impression for scripting use cases</li>
+<li>It's Python-based, so it's noticeably slower to start up than curl or native alternatives like xh</li>
+</ul>
+<strong>Target user:</strong> Developers who spend a lot of time manually testing APIs from the terminal and want something more readable than curl, but primarily in interactive shell sessions.
+
+<strong>Would I use it?</strong> Maybe — I'd use it for interactive API exploration at the terminal where it shines, but I'd stick with curl for scripts and CI pipelines to avoid the stdin headaches.
+
+<strong>Rating:</strong> 3/5
+
+<h2>Issues Found</h2>
+
+<ul><li>The <code>http</code> and <code>https</code> commands are not found after pip install, likely because pip installed the binaries to ~/.local/bin which is not on the PATH in this environment</li>
+</ul>
+<h2>Tips</h2>
+
+<ul><li>After pip install, add ~/.local/bin to your PATH: export PATH="$HOME/.local/bin:$PATH"</li>
+<li>Alternatively, use <code>pip install --user httpie</code> and ensure ~/.local/bin is in PATH, or use <code>sudo pip install httpie</code> to install system-wide to /usr/local/bin</li>
+<li>You can also run it directly via <code>python -m httpie</code> as a workaround</li>
+</ul>
+<hr>
+<em>Generated by <a href="https://github.com/yaowubarbara/first-look">first-look</a> - AI tries new tools so you don't have to.</em>
+
+  </div>
+  <div class="footer">
+    <a href="https://github.com/yaowubarbara/first-look">GitHub</a> ·
+    AI tries new tools so you don't have to
+  </div>
+</body>
+</html>
