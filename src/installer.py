@@ -33,11 +33,16 @@ IMAGE_TAG_PREFIX = "first-look-env"
 
 # Commands that should never appear in generated install/usage commands
 BLOCKED_PATTERNS = [
-    "rm -rf /",
+    "rm -rf /", "rm -rf ~", "rm -rf $HOME", "rm -rf *",
     "mkfs.", "dd if=", ":(){", "fork bomb",
-    "chmod -R 777 /",
-    "> /dev/sda",
+    "chmod -R 777", "chmod 777 /",
+    "> /dev/sda", "> /dev/",
     "shutdown", "reboot", "halt", "poweroff",
+    "curl|bash", "curl|sh", "wget|bash", "wget|sh",
+    "curl | bash", "curl | sh", "wget | bash", "wget | sh",
+    "python -c \"import os;os.system",
+    "nc -l", "ncat", "netcat",
+    "nohup", "crontab",
 ]
 
 
@@ -47,6 +52,10 @@ def _is_command_safe(cmd: str) -> bool:
     for pattern in BLOCKED_PATTERNS:
         if pattern in cmd_lower:
             return False
+    # Check for pipe-to-shell patterns (curl/wget ... | bash/sh)
+    import re
+    if re.search(r"(curl|wget)\s+.+\|\s*(bash|sh)", cmd_lower):
+        return False
     return True
 
 

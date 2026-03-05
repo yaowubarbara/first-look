@@ -13,16 +13,18 @@ from typing import Optional
 
 
 # OpenAI-compatible LLM API endpoint
-DEFAULT_PROXY_URL = "http://127.0.0.1:3456/v1/chat/completions"
-DEFAULT_MODEL = "openai/gpt-4o"
+# Supports: OpenAI, Ollama, LiteLLM, vLLM, or any OpenAI-compatible API
+DEFAULT_API_URL = "https://api.openai.com/v1/chat/completions"
+DEFAULT_MODEL = "gpt-4o"
 
 
 def _call_llm(prompt: str, system: str = "", model: str = "",
               max_tokens: int = 4096, api_key: str = "",
               retries: int = 2) -> str:
     """Call LLM via OpenAI-compatible API endpoint."""
-    proxy_url = os.environ.get("LLM_API_URL", DEFAULT_PROXY_URL)
+    api_url = os.environ.get("LLM_API_URL", DEFAULT_API_URL)
     model = model or os.environ.get("LLM_MODEL", DEFAULT_MODEL)
+    api_key = api_key or os.environ.get("OPENAI_API_KEY", "")
 
     messages = []
     if system:
@@ -35,12 +37,16 @@ def _call_llm(prompt: str, system: str = "", model: str = "",
         "max_tokens": max_tokens,
     }).encode()
 
+    headers = {"Content-Type": "application/json"}
+    if api_key:
+        headers["Authorization"] = f"Bearer {api_key}"
+
     for attempt in range(retries + 1):
         try:
             req = urllib.request.Request(
-                proxy_url,
+                api_url,
                 data=payload,
-                headers={"Content-Type": "application/json"},
+                headers=headers,
             )
             with urllib.request.urlopen(req, timeout=120) as resp:
                 data = json.loads(resp.read())
