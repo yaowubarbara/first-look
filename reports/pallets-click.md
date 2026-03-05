@@ -6,7 +6,7 @@
 |-------|-------|
 | Tested | 2026-03-05 15:24 UTC |
 | Source | https://github.com/pallets/click |
-| HN Post | "" (score: 0) |
+| HN Post | Manual test |
 | Language | Python |
 | Stars | 17335 |
 | Verdict | WARN works_with_issues |

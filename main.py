@@ -6,6 +6,7 @@ Usage:
     python main.py scan              # Scan HN and test new tools
     python main.py test owner/repo   # Test a specific GitHub repo
     python main.py monitor           # Continuous monitoring mode
+    python main.py site              # Generate static website from reports
 """
 
 import sys
@@ -41,6 +42,10 @@ def main():
         config = load_config()
         result = process_repo(parts[0], parts[1], config=config)
         print(f"\nResult: {result.get('verdict', 'unknown')}")
+
+    elif cmd == "site":
+        from src.site import build_site
+        build_site()
 
     elif cmd == "monitor":
         config = load_config()

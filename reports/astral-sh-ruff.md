@@ -6,7 +6,7 @@
 |-------|-------|
 | Tested | 2026-03-05 15:22 UTC |
 | Source | https://github.com/astral-sh/ruff |
-| HN Post | "" (score: 0) |
+| HN Post | Manual test |
 | Language | Rust |
 | Stars | 46114 |
 | Verdict | WARN works_with_issues |

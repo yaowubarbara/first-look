@@ -13,6 +13,7 @@ from .analyzer import analyze_repo
 from .installer import build_environment, test_install
 from .agent import generate_install_commands, generate_usage_commands, write_experience_review, analyze_results
 from .reporter import generate_report, generate_tweet
+from .site import build_site
 
 
 def load_config(path: str = "config.yaml") -> dict:
@@ -169,6 +170,9 @@ def process_repo(owner: str, name: str, hn_post: Optional[HNPost] = None,
         difficulty=analysis.get("install_difficulty", "unknown"),
         summary=analysis.get("summary", ""),
     )
+
+    # Rebuild static site
+    build_site()
 
     print(f"\n  Report: {report_path}")
     print(f"\n  Draft tweet:\n  {tweet}")

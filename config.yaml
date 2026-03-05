@@ -20,9 +20,10 @@ environments:
   # - name: node-20
 
 llm:
-  # Model and API are configured via environment variables:
-  #   LLM_API_URL (default: http://127.0.0.1:3456/v1/chat/completions)
-  #   LLM_MODEL (default: openai/gpt-4o)
+  # Configured via environment variables:
+  #   OPENAI_API_KEY (required)
+  #   LLM_API_URL (default: https://api.openai.com/v1/chat/completions)
+  #   LLM_MODEL (default: gpt-4o)
   max_tokens: 4096
 
 output:

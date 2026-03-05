@@ -6,7 +6,7 @@
 |-------|-------|
 | Tested | 2026-03-05 06:11 UTC |
 | Source | https://github.com/httpie/cli |
-| HN Post | "" (score: 0) |
+| HN Post | Manual test |
 | Language | Python |
 | Stars | 37636 |
 | Verdict | WARN works_with_issues |
@@ -30,7 +30,9 @@ HTTPie installs via pip without errors, but the CLI binaries land in ~/.local/bi
 3. Verify: http --version
 4. Optional: Add the PATH export to ~/.bashrc for persistence
 
-## Hands-On Experience
+## Automated Usage Test
+
+> *The following is AI-generated based on actual command execution in a Docker sandbox. Results may differ in your environment.*
 
 **First Impression:** The GET request experience is genuinely nice — colorized JSON output with zero config feels like what curl should have been. But I hit a surprising stdin-related error on basic POST requests that took the shine off quickly.
 

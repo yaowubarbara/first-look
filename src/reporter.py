@@ -77,7 +77,7 @@ def generate_report(repo_owner: str, repo_name: str, repo_description: str,
 |-------|-------|
 | Tested | {now} |
 | Source | https://github.com/{repo_owner}/{repo_name} |
-| HN Post | "{hn_title}" (score: {hn_score}) |
+| HN Post | {f'"{hn_title}" (score: {hn_score})' if hn_title else 'Manual test'} |
 | Language | {language} |
 | Stars | {stars} |
 | Verdict | {verdict_emoji} {verdict} |
